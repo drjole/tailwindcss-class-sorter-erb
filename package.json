@@ -1,9 +1,10 @@
 {
     "name": "tailwindcss-class-sorter-erb",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "author": "Jonas Weber <jonas@jole.dev>",
     "license": "MIT",
     "type": "module",
+    "main": "./bin/tailwind_class_sorter_erb.js",
     "bin": "./bin/tailwind_class_sorter_erb.js",
     "files": [
         "queries"
