@@ -1,6 +1,6 @@
 {
     "name": "tailwindcss-class-sorter-erb",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author": "Jonas Weber <jonas@jole.dev>",
     "license": "MIT",
     "type": "module",
