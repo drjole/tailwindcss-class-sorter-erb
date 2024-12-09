@@ -1,18 +1,22 @@
 {
-  "name": "tailwindcss-class-sorter-erb",
-  "version": "0.0.1",
-  "author": "Jonas Weber <jonas@jole.dev>",
-  "license": "MIT",
-  "dependencies": {
-    "prettier": "^3.4.1",
-    "prettier-plugin-tailwindcss": "^0.6.9",
-    "tree-sitter": "^0.22.1",
-    "tree-sitter-embedded-template": "^0.23.2",
-    "tree-sitter-html": "^0.23.2",
-    "tree-sitter-ruby": "^0.23.1"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.1",
-    "typescript": "^5.7.2"
-  }
+    "name": "tailwindcss-class-sorter-erb",
+    "version": "0.1.0",
+    "author": "Jonas Weber <jonas@jole.dev>",
+    "license": "MIT",
+    "type": "module",
+    "bin": "./bin/tailwind_class_sorter_erb.js",
+    "files": [
+        "queries"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "prettier": "^3.4.1",
+        "prettier-plugin-tailwindcss": "^0.6.9",
+        "tree-sitter": "^0.22.1",
+        "tree-sitter-embedded-template": "^0.23.2",
+        "tree-sitter-html": "^0.23.2",
+        "tree-sitter-ruby": "^0.23.1"
+    }
 }
