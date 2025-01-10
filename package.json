@@ -1,6 +1,6 @@
 {
     "name": "tailwindcss-class-sorter-erb",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "",
     "main": "./bin/tailwind_class_sorter_erb.js",
     "bin": "./bin/tailwind_class_sorter_erb.js",
