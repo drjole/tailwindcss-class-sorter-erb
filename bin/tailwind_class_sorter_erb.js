@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -99,9 +99,25 @@ async function sortClasses(classes) {
 }
 
 async function main() {
-    const sourceCode = readFileSync(0, "utf-8").toString();
-    const formattedCode = await formatSourceCode(sourceCode);
-    process.stdout.write(formattedCode);
+    const write = process.argv.includes("--write");
+    let files;
+    if (write) {
+        files = process.argv.slice(3);
+    } else {
+        files = process.argv.slice(2);
+    }
+    if (files.length === 0) {
+        files = [0];
+    }
+    for (const file of files) {
+        const sourceCode = readFileSync(file, "utf-8").toString();
+        const formattedCode = await formatSourceCode(sourceCode);
+        if (write) {
+            writeFileSync(file, formattedCode);
+        } else {
+            process.stdout.write(formattedCode);
+        }
+    }
 }
 
 main();
