@@ -59,7 +59,19 @@ async function formatSourceCode(sourceCode) {
             const after = sourceCode.slice(
                 capture.codeStartIndex + capture.node.endIndex,
             );
-            sourceCode = `${before}${sortedClasses}${after}`;
+            const additionalNewLines = Array(
+                classes.split("\n").length - sortedClasses.split("\n").length,
+            )
+                .fill("\n")
+                .join("");
+            const additionalWhiteSpace = Array(
+                classes.length -
+                sortedClasses.length -
+                additionalNewLines.length,
+            )
+                .fill(" ")
+                .join("");
+            sourceCode = `${before}${sortedClasses}${additionalNewLines}${additionalWhiteSpace}${after}`;
         }
     }
     return sourceCode;
