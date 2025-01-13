@@ -10,7 +10,7 @@
     "dependencies": {
         "prettier": "^3.4.1",
         "prettier-plugin-tailwindcss": "^0.6.9",
-        "tree-sitter": "^0.22.1",
+        "tree-sitter": "^0.21.1",
         "tree-sitter-embedded-template": "^0.23.2",
         "tree-sitter-html": "^0.23.2",
         "tree-sitter-ruby": "^0.23.1"

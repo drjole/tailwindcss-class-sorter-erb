@@ -100,6 +100,7 @@ async function sortClasses(classes) {
     const formatted = await format(`<div class="${classes}"></div>`, {
         parser: "html",
         plugins: ["prettier-plugin-tailwindcss"],
+        tailwindConfig: "./config/tailwind.config.js",
     });
     const formattedClasses = htmlCaptures(formatted).find(
         (capture) => capture.name === "class_value",
