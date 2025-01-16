@@ -8,6 +8,7 @@
     "license": "MIT",
     "type": "module",
     "dependencies": {
+        "commander": "^13.0.0",
         "prettier": "^3.4.1",
         "prettier-plugin-tailwindcss": "^0.6.9",
         "tree-sitter": "^0.21.1",

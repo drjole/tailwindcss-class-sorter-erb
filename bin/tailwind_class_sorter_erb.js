@@ -3,9 +3,8 @@
 import { readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-
+import { program } from "commander";
 import { format } from "prettier";
-
 import Parser, { Query } from "tree-sitter";
 import EmbeddedTemplate from "tree-sitter-embedded-template";
 import HTML from "tree-sitter-html";
@@ -97,11 +96,14 @@ function rubyCaptures(sourceCode) {
 }
 
 async function sortClasses(classes) {
-    const formatted = await format(`<div class="${classes}"></div>`, {
-        parser: "html",
-        plugins: ["prettier-plugin-tailwindcss"],
-        tailwindConfig: "./config/tailwind.config.js",
-    });
+    let options = JSON.parse(readFileSync(".prettierrc", "utf-8"));
+    options.parser = "html";
+    if (options.plugins) {
+        options.plugins.push("prettier-plugin-tailwindcss");
+    } else {
+        options.plugins = ["prettier-plugin-tailwindcss"];
+    }
+    const formatted = await format(`<div class="${classes}"></div>`, options);
     const formattedClasses = htmlCaptures(formatted).find(
         (capture) => capture.name === "class_value",
     );
@@ -112,25 +114,28 @@ async function sortClasses(classes) {
 }
 
 async function main() {
-    const write = process.argv.includes("--write");
-    let files;
-    if (write) {
-        files = process.argv.slice(3);
-    } else {
-        files = process.argv.slice(2);
-    }
-    if (files.length === 0) {
-        files = [0];
-    }
-    for (const file of files) {
-        const sourceCode = readFileSync(file, "utf-8").toString();
-        const formattedCode = await formatSourceCode(sourceCode);
-        if (write) {
-            writeFileSync(file, formattedCode);
-        } else {
-            process.stdout.write(formattedCode);
-        }
-    }
+    program
+        .option("--write")
+        .argument("[files...]")
+        .action(async (fileArgs, options) => {
+            if (fileArgs.length == 0 && options.write) {
+                console.error("Cannot use --write when passing code via stdin");
+                process.exit(1);
+            }
+
+            const files = fileArgs.length == 0 ? [0] : fileArgs;
+            for (const file of files) {
+                const sourceCode = readFileSync(file, "utf-8").toString();
+                const formattedCode = await formatSourceCode(sourceCode);
+                if (options.write) {
+                    writeFileSync(file, formattedCode);
+                } else {
+                    process.stdout.write(formattedCode);
+                }
+            }
+        });
+
+    program.parse();
 }
 
 main();
