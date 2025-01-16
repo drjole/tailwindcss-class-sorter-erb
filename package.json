@@ -3,7 +3,9 @@
     "version": "0.6.0",
     "description": "",
     "main": "./bin/tailwind_class_sorter_erb.js",
-    "bin": "./bin/tailwind_class_sorter_erb.js",
+    "bin": {
+        "tailwindcss-class-sorter-erb": "bin/tailwind_class_sorter_erb.js"
+    },
     "author": "Jonas Weber <jonas@jole.dev>",
     "license": "MIT",
     "type": "module",
