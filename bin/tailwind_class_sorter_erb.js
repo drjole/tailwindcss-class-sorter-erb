@@ -103,7 +103,7 @@ async function sortClasses(classes) {
     } else {
         options.plugins = ["prettier-plugin-tailwindcss"];
     }
-    const formatted = await format(`<div class="${classes}"></div>`, options);
+    const formatted = await format(`<div class=${classes}></div>`, options);
     const formattedClasses = htmlCaptures(formatted).find(
         (capture) => capture.name === "class_value",
     );
