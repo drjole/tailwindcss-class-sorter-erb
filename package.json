@@ -6,6 +6,9 @@
     "bin": {
         "tailwindcss-class-sorter-erb": "bin/tailwind_class_sorter_erb.js"
     },
+    "scripts": {
+        "test": "node --test tests --silent"
+    },
     "author": "Jonas Weber <jonas@jole.dev>",
     "license": "MIT",
     "type": "module",
