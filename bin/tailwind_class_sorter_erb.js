@@ -12,85 +12,89 @@ import Ruby from "tree-sitter-ruby";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const embeddedParser = new Parser();
-embeddedParser.setLanguage(EmbeddedTemplate);
+const parser = new Parser();
+
 const embeddedQuery = new Query(
     EmbeddedTemplate,
     readFileSync(join(__dirname, "../queries/embedded_template.scm")),
 );
-
-const htmlParser = new Parser();
-htmlParser.setLanguage(HTML);
 const htmlQuery = new Query(
     HTML,
     readFileSync(join(__dirname, "../queries/html.scm")),
 );
-
-const rubyParser = new Parser();
-rubyParser.setLanguage(Ruby);
 const rubyQuery = new Query(
     Ruby,
     readFileSync(join(__dirname, "../queries/ruby.scm")),
 );
 
 async function formatSourceCode(sourceCode) {
-    const captures = [
-        ...htmlCaptures(sourceCode).map((htmlCapture) => ({
-            ...htmlCapture,
-            codeStartIndex: 0,
-        })),
-        ...embeddedCaptures(sourceCode).flatMap((embeddedCapture) =>
-            rubyCaptures(embeddedCapture.node.text).map((rubyCapture) => ({
-                ...rubyCapture,
-                codeStartIndex: embeddedCapture.node.startIndex,
-            })),
-        ),
-    ];
-
-    for (const capture of captures) {
-        if (capture.name === "class_value") {
-            const classes = capture.node.text;
-            const sortedClasses = await sortClasses(classes);
-            const before = sourceCode.slice(
-                0,
-                capture.codeStartIndex + capture.node.startIndex,
-            );
-            const after = sourceCode.slice(
-                capture.codeStartIndex + capture.node.endIndex,
-            );
-            const additionalNewLines = Array(
-                classes.split("\n").length - sortedClasses.split("\n").length,
-            )
-                .fill("\n")
-                .join("");
-            const additionalWhiteSpace = Array(
-                classes.length -
-                sortedClasses.length -
-                additionalNewLines.length,
-            )
-                .fill(" ")
-                .join("");
-            sourceCode = `${before}${sortedClasses}${additionalNewLines}${additionalWhiteSpace}${after}`;
+    parser.setLanguage(EmbeddedTemplate);
+    const embeddedTemplateTree = parser.parse(sourceCode);
+    let htmlRanges = [];
+    for (const childNode of embeddedTemplateTree.rootNode.children) {
+        if (childNode.type == "content") {
+            htmlRanges.push({
+                startIndex: childNode.startIndex,
+                endIndex: childNode.endIndex,
+                startPosition: childNode.startPosition,
+                endPosition: childNode.endPosition,
+            });
         }
     }
+
+    parser.setLanguage(HTML);
+    const htmlTree = parser.parse(sourceCode, null, {
+        includedRanges: htmlRanges,
+    });
+    const htmlClassValueCaptures = htmlQuery
+        .captures(htmlTree.rootNode)
+        .filter((capture) => capture.name == "quoted_class_value");
+
+    for (const htmlClassValueCapture of htmlClassValueCaptures) {
+        for (const htmlRange of htmlRanges) {
+            let start = Math.max(
+                htmlClassValueCapture.node.startIndex,
+                htmlRange.startIndex,
+            );
+            let end = Math.min(
+                htmlClassValueCapture.node.endIndex,
+                htmlRange.endIndex,
+            );
+            if (end < start) {
+                continue;
+            }
+            let classString = sourceCode.slice(start, end);
+            const matches = [...classString.matchAll(/["\s]/g)];
+            if (matches.length <= 0) {
+                continue;
+            }
+            const startOffset = matches[0].index;
+            const endOffset = matches[matches.length - 1].index;
+            end = start + endOffset;
+            start += startOffset + 1;
+            if (end <= start) {
+                continue;
+            }
+
+            classString = sourceCode.slice(start, end);
+            sourceCode = sourceCode.split("");
+            sourceCode.splice(
+                start,
+                end - start,
+                await sortClasses(classString),
+            );
+            sourceCode = sourceCode.join("");
+        }
+    }
+
     return sourceCode;
 }
 
-function embeddedCaptures(sourceCode) {
-    const tree = embeddedParser.parse(sourceCode);
-    return embeddedQuery.captures(tree.rootNode);
-}
-
 function htmlCaptures(sourceCode) {
+    const htmlParser = new Parser();
+    htmlParser.setLanguage(HTML);
     const tree = htmlParser.parse(sourceCode);
     return htmlQuery
-        .captures(tree.rootNode)
-        .filter((capture) => capture.name === "class_value");
-}
-
-function rubyCaptures(sourceCode) {
-    const tree = rubyParser.parse(sourceCode);
-    return rubyQuery
         .captures(tree.rootNode)
         .filter((capture) => capture.name === "class_value");
 }
@@ -103,7 +107,7 @@ async function sortClasses(classes) {
     } else {
         options.plugins = ["prettier-plugin-tailwindcss"];
     }
-    const formatted = await format(`<div class=${classes}></div>`, options);
+    const formatted = await format(`<div class="${classes}"></div>`, options);
     const formattedClasses = htmlCaptures(formatted).find(
         (capture) => capture.name === "class_value",
     );
