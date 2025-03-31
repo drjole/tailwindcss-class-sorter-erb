@@ -1,3 +1,3 @@
-(output_directive
-  (code) @code
-)
+(content) @content
+
+(code) @code
