@@ -8,9 +8,6 @@ const sorter = new TailwindCSSClassSorterERB();
 fs.readdir("tests/files", async function(_, files) {
     // For each pair of files like "a.html.erb" and "a.expected.html.erb", run a test:
     for (const file of files) {
-        // if (file != "o.html.erb") {
-        //     continue;
-        // }
         if (file.match(/^[a-z]\.html\.erb$/)) {
             const expectedFile = file.replace(/\.html\.erb$/, ".expected.html.erb");
 
