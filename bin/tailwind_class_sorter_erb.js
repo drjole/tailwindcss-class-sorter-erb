@@ -2,7 +2,7 @@
 
 import { readFileSync, writeFileSync } from "fs";
 import { program } from "commander";
-import { formatSourceCode } from "../lib/tailwindcss_class_sorter_erb.js";
+import { TailwindCSSClassSorterERB } from "../lib/tailwindcss_class_sorter_erb.js";
 
 async function main() {
     program
@@ -15,9 +15,10 @@ async function main() {
             }
 
             const files = fileArgs.length == 0 ? [0] : fileArgs;
+            const sorter = new TailwindCSSClassSorterERB();
             for (const file of files) {
                 const sourceCode = readFileSync(file, "utf-8").toString();
-                const formattedCode = await formatSourceCode(sourceCode);
+                const formattedCode = await sorter.sort(sourceCode);
                 if (options.write) {
                     writeFileSync(file, formattedCode);
                 } else {
