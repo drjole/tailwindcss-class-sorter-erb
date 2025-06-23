@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync } from "fs";
+import { promises as fs } from "fs";
 import { program } from "commander";
 import { TailwindCSSClassSorterERB } from "../lib/tailwindcss_class_sorter_erb.js";
 
@@ -9,22 +9,29 @@ async function main() {
         .option("--write")
         .argument("[files...]")
         .action(async (fileArgs, options) => {
-            if (fileArgs.length == 0 && options.write) {
-                console.error("Cannot use --write when passing code via stdin");
+            if (fileArgs.length === 0 && options.write) {
+                console.error("Cannot use --write when reading from stdin.");
+                process.exit(1);
+            }
+
+            if (fileArgs.length > 1 && !options.write) {
+                console.error("Cannot process multiple files without --write option.");
                 process.exit(1);
             }
 
             const files = fileArgs.length == 0 ? [0] : fileArgs;
             const sorter = new TailwindCSSClassSorterERB();
-            for (const file of files) {
-                const sourceCode = readFileSync(file, "utf-8").toString();
-                const formattedCode = await sorter.sort(sourceCode);
-                if (options.write) {
-                    writeFileSync(file, formattedCode);
-                } else {
-                    process.stdout.write(formattedCode);
-                }
-            }
+            await Promise.all(
+                files.map(async (file) => {
+                    const sourceCode = await fs.readFile(file, "utf-8");
+                    const formattedCode = await sorter.sort(sourceCode);
+                    if (options.write) {
+                        await fs.writeFile(file, formattedCode);
+                    } else {
+                        process.stdout.write(formattedCode);
+                    }
+                }),
+            );
         });
 
     program.parse();
