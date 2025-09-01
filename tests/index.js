@@ -9,7 +9,7 @@ async function loadTests() {
     const files = await fs.readdir("tests/files");
 
     for (const file of files) {
-        if (file.match(/^[a-z]\.html\.erb$/)) {
+        if (file.match(/^[a-z]+\.html\.erb$/)) {
             const expectedFile = file.replace(/\.html\.erb$/, ".expected.html.erb");
 
             // Define a test per file
